@@ -61,8 +61,9 @@
     <Compile Include="Assets\-scripts\DragHandler.cs" />
     <Compile Include="Assets\-scripts\InterfaceManager.cs" />
     <Compile Include="Assets\-scripts\Link.cs" />
+    <Compile Include="Assets\-scripts\LinkSwitcher.cs" />
     <Compile Include="Assets\-scripts\Node.cs" />
-    <Compile Include="Assets\-scripts\TextExpand.cs" />
+    <Compile Include="Assets\-scripts\TextSaving.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/UnityProjects/root editor/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>

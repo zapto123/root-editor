@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,7 +8,7 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, ISele
 {
     private Vector2 dragStart;
 
-    private InterfaceManager uiManager;
+    public InterfaceManager uiManager;
 
     private void Start()
     {
@@ -32,9 +33,16 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, ISele
 
     public void OnDrag(PointerEventData eventData)
     {
-        //print("Dragging");
         transform.parent.localPosition += (Vector3) (eventData.position - dragStart);
         dragStart = eventData.position;
+        
+        if (uiManager.data[Int32.Parse(transform.parent.name)].linkedLinkCounter != 0)
+            //foreach (GameObject gm in uiManager.data[Int32.Parse(transform.parent.name)].linkedLinks)
+            for(int i = 0; i < uiManager.data[Int32.Parse(transform.parent.name)].linkedLinkCounter; i++)
+            {
+                uiManager.MoveLink(uiManager.GetLinkID(uiManager.data[Int32.Parse(transform.parent.name)].linkedLinks[i].name));
+                //uiManager.MoveLink(uiManager.GetLinkID(gm.name));
+            }
     }
 
     #endregion

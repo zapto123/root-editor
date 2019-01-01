@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net.Mime;
 using UnityEngine;
 using UnityEngine.Experimental.UIElements;
@@ -15,7 +17,7 @@ public class InterfaceManager : MonoBehaviour
     public Material mat;
     public Canvas canv;
     private Vector3 mousePositionStart;
-    private Node[] data;
+    public Node[] data;
     private Link[] links;
     public GameObject nodePrefab;
     public GameObject linkPrefab;
@@ -30,6 +32,10 @@ public class InterfaceManager : MonoBehaviour
     private float screenHeight;
     private float screenWidth;
     public float pixelsToCamSize;
+    public Sprite link0;
+    public Sprite link1;
+    public Sprite link2;
+
     private void Start()
     {
         nodeCounter = 0;
@@ -42,6 +48,12 @@ public class InterfaceManager : MonoBehaviour
         mainCam.orthographicSize = Screen.height / pixelsToCamSize;
         //print(Screen.width + " x " + Screen.height);
         //(mainCam.orthographicSize* 2 *mainCam.aspect + " x " + mainCam.orthographicSize * 2);
+    }
+
+
+    private void Awake()
+    {
+        print(GetLinkID("link1"));
     }
 
     private void Update()
@@ -82,7 +94,6 @@ public class InterfaceManager : MonoBehaviour
         {
             liveLink.transform.localPosition = new Vector3((initialNode.transform.localPosition.x + trueMousePosition.x)/2, (initialNode.transform.localPosition.y + trueMousePosition.y)/2, -1f);
             liveLink.transform.eulerAngles = new Vector3(0f, 0f, GetVectorAngle(initialNode.transform.localPosition, trueMousePosition));
-            print(Vector2.Distance(trueMousePosition, initialNode.transform.localPosition));
             liveLink.rectTransform.sizeDelta = new Vector2(Vector2.Distance(trueMousePosition, initialNode.transform.localPosition) / liveLink.transform.localScale.x, liveLink.rectTransform.rect.height);
                      //transform.localScale = new Vector3(Vector2.Distance(trueMousePosition, initialNode.transform.localPosition) / liveLink.sprite.rect.width / canv.transform.localScale.x, liveLink.transform.localScale.y,liveLink.transform.localScale.z);
         }
@@ -100,6 +111,11 @@ public class InterfaceManager : MonoBehaviour
     {
         data[id].value = text;
         //print(id + " " + text);
+    }
+
+    public void EditTitle()
+    {
+        
     }
 
     public void SelectNode(GameObject node)
@@ -138,14 +154,18 @@ public class InterfaceManager : MonoBehaviour
         data[++nodeCounter] = new Node();
         data[nodeCounter].gameObj = Instantiate(nodePrefab);
         data[nodeCounter].gameObj.transform.parent = canv.transform;
-        data[nodeCounter].gameObj.transform.localPosition = trueMousePosition;
+        data[nodeCounter].gameObj.transform.localPosition = trueMousePosition + bg.transform.localPosition;
         data[nodeCounter].gameObj.name = nodeCounter.ToString();
+        data[nodeCounter].id = nodeCounter;
     }
 
     public void CreateLink(GameObject newNode)
     {
-        links[++linkCounter] = new Link();
+        links[linkCounter] = new Link();
         links[linkCounter].gameObj = Instantiate(linkPrefab);////////////////////////////////////////////////
+        links[linkCounter].gameObj.name = "link" + linkCounter;
+        links[linkCounter].img = links[linkCounter].gameObj.GetComponent<Image>();
+        links[linkCounter].linkState = 0;
         links[linkCounter].linkedRect = links[linkCounter].gameObj.GetComponent<RectTransform>();
         links[linkCounter].gameObj.transform.parent = canv.transform;
         links[linkCounter].linkedRect.SetAsFirstSibling();
@@ -154,28 +174,87 @@ public class InterfaceManager : MonoBehaviour
         links[linkCounter].linkedRect.sizeDelta = new Vector2(Vector2.Distance(newNode.transform.localPosition, initialNode.transform.localPosition) / liveLink.transform.localScale.x, liveLink.rectTransform.rect.height);
         
         links[linkCounter].linkedNodes = new GameObject[2];
+        links[linkCounter].linkedNodes[0] = new GameObject();
         links[linkCounter].linkedNodes[0] = initialNode;
+        links[linkCounter].linkedNodes[1] = new GameObject();
         links[linkCounter].linkedNodes[1] = newNode;
         
-        data[Int32.Parse(initialNode.name)].linkCounter++;
-        if (data[Int32.Parse(initialNode.name)].linkCounter == 1)
+        if (data[Int32.Parse(initialNode.name)].linkedNodeCounter == 0)
         {
-            data[Int32.Parse(initialNode.name)].links = new int[1000];
+            data[Int32.Parse(initialNode.name)].linkedNodes = new int[1000];
         }
-        data[Int32.Parse(initialNode.name)].links[data[Int32.Parse(initialNode.name)].linkCounter] = Int32.Parse(newNode.name);
+        data[Int32.Parse(initialNode.name)].linkedNodes[data[Int32.Parse(initialNode.name)].linkedNodeCounter] = Int32.Parse(newNode.name);
+        data[Int32.Parse(initialNode.name)].linkedNodeCounter++;
+
         
-        
-        
-        data[Int32.Parse(newNode.name)].linkCounter++;
-        if (data[Int32.Parse(newNode.name)].linkCounter == 1)
+        if (data[Int32.Parse(newNode.name)].linkedNodeCounter == 0)
         {
-            data[Int32.Parse(newNode.name)].links = new int[1000];
+            data[Int32.Parse(newNode.name)].linkedNodes = new int[1000];
         }
-        data[Int32.Parse(newNode.name)].links[data[Int32.Parse(newNode.name)].linkCounter] = Int32.Parse(initialNode.name);
+        data[Int32.Parse(newNode.name)].linkedNodes[data[Int32.Parse(newNode.name)].linkedNodeCounter] = Int32.Parse(initialNode.name);
+        data[Int32.Parse(newNode.name)].linkedNodeCounter++;
+
+        
+        
+        if (data[Int32.Parse(initialNode.name)].linkedLinkCounter == 0)
+        {
+            data[Int32.Parse(initialNode.name)].linkedLinks = new GameObject[1000];
+        }
+
+        data[Int32.Parse(initialNode.name)].linkedLinks[data[Int32.Parse(initialNode.name)].linkedLinkCounter] =
+            links[linkCounter].gameObj;
+        data[Int32.Parse(initialNode.name)].linkedLinkCounter++;
+
+        if (data[Int32.Parse(newNode.name)].linkedLinkCounter == 0)
+        {
+            data[Int32.Parse(newNode.name)].linkedLinks = new GameObject[1000];
+        }
+
+        data[Int32.Parse(newNode.name)].linkedLinks[data[Int32.Parse(newNode.name)].linkedLinkCounter] =
+            links[linkCounter].gameObj;
+        
+        data[Int32.Parse(newNode.name)].linkedLinkCounter++;
+        linkCounter++;
     }
 
     public float GetVectorAngle(Vector2 first, Vector2 second)
     {
         return Convert.ToSingle(Math.Atan((first.y - second.y) / (first.x - second.x)) * 180 / Math.PI);
+    }
+
+    public void DisplayAllData()
+    {
+        for(int i = 1; i <= nodeCounter; i++)
+        {
+            print(data[i].id + " " + data[i].title + " " + data[i].value + " " + data[i].linkedNodes);
+        }
+    }
+
+    public int GetLinkID(string name)
+    {
+        return Int32.Parse(new String(name.Where(Char.IsDigit).ToArray()));
+    }
+
+    public void LinkSwitchMain(string name)
+    {
+        int id = GetLinkID(name);
+        links[id].linkState = ++links[id].linkState % 3;
+        links[id].img.sprite = (links[id].linkState == 2) ? link2 : (links[id].linkState == 1) ? link1 : link0;
+        if (links[id].linkState == 1)
+        {
+            links[id].img.sprite = link1;
+        } else if (links[id].linkState == 2)
+        {
+            links[id].img.sprite = link2;
+        } else {
+            links[id].img.sprite = link0;
+        }
+    }
+
+    public void MoveLink(int id)
+    {
+        links[id].gameObj.transform.localPosition = new Vector3((links[id].linkedNodes[0].transform.localPosition.x + links[id].linkedNodes[1].transform.localPosition.x)/2, (links[id].linkedNodes[0].transform.localPosition.y + links[id].linkedNodes[1].transform.localPosition.y)/2, -0.5f);;
+        links[id].gameObj.transform.eulerAngles = new Vector3(0f, 0f, GetVectorAngle(links[id].linkedNodes[0].transform.localPosition, links[id].linkedNodes[1].transform.localPosition));
+        links[id].linkedRect.sizeDelta = new Vector2(Vector2.Distance(links[id].linkedNodes[1].transform.localPosition, links[id].linkedNodes[0].transform.localPosition) / links[id].gameObj.transform.localScale.x, links[id].linkedRect.rect.height);
     }
 }

@@ -12,8 +12,9 @@
           <e p="DragHandler.cs" t="Include" />
           <e p="InterfaceManager.cs" t="Include" />
           <e p="Link.cs" t="Include" />
+          <e p="LinkSwitcher.cs" t="Include" />
           <e p="Node.cs" t="Include" />
-          <e p="TextExpand.cs" t="Include" />
+          <e p="TextSaving.cs" t="Include" />
         </e>
       </e>
       <e p="Library" t="ExcludeRecursive" />

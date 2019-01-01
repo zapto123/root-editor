@@ -7,8 +7,10 @@ public class Node : MonoBehaviour
     public int id;
     public string title;
     public string value;
-    public int[] links;
-    public int linkCounter;
+    public int[] linkedNodes;
+    public GameObject[] linkedLinks;
+    public int linkedNodeCounter;
+    public int linkedLinkCounter;
     public string requiredEvent;
     public string trigger;
     public Vector2 position;
